@@ -97,3 +97,27 @@ def test_admin_can_create_and_reset_local_account(tmp_path):
 def test_csrf_is_required(local_client):
     bootstrap_admin(local_client)
     assert local_client.post("/logout", data={"csrf": "forged"}).status_code == 403
+
+
+def test_ingress_session_check_exposes_no_identity_or_secret(local_client):
+    anonymous = local_client.get("/api/platform/v1/session")
+    assert anonymous.status_code == 404
+    bootstrap_admin(local_client)
+    authenticated = local_client.get("/api/platform/v1/session")
+    assert authenticated.status_code == 404
+    assert "x-foxden-identity" not in authenticated.headers
+    ingress = local_client.get("/api/platform/v1/session", headers={"X-FoxDen-Ingress": "1"})
+    assert ingress.status_code == 404
+
+
+def test_spoofed_ingress_marker_cannot_reach_private_session_endpoint(tmp_path):
+    from dataclasses import replace
+
+    configured = replace(settings(tmp_path), ingress_auth_secret="ingress-test-secret-123456789012345")
+    with TestClient(create_app(configured)) as client:
+        bootstrap_admin(client)
+        assert client.get("/api/platform/v1/session", headers={"X-FoxDen-Ingress": "1"}).status_code == 404
+        valid = client.get("/api/platform/v1/session", headers={
+            "X-FoxDen-Ingress": "1", "X-FoxDen-Ingress-Auth": configured.ingress_auth_secret,
+        })
+        assert valid.status_code == 204 and valid.content == b""

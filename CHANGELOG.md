@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.4.1 - 2026-10-27
+
+### Added
+
+- Ed25519-signed, audience-bound internal identities with Portal-only private
+  keys, module public-key verification, replay protection, and documented
+  zero-downtime key rotation.
+- Separate service-scoped Portal activity aggregation with a sanitized
+  Movies/TV activity contract; restricted users remain read-only while
+  Portal-originated writes require administrator role.
+- Real Movies/TV module-summary endpoint implementing Portal contract v1 with
+  sanitized health and capabilities. Activity remains withheld until trusted
+  Portal-to-module authentication is implemented.
+- Cross-component contract tests that validate the real Movies/TV response with
+  the Portal's strict contract model.
+- Accepted and implemented the review configuration for the existing Nginx
+  gateway to become the sole ingress, with Portal as an independent session
+  authority and optional-module failure isolation.
+- Container regression coverage for Portal availability with Music, Movies/TV,
+  and the contained browser absent, plus client identity-header stripping.
+- Phase 1A Portal foundation with a responsive platform dashboard, isolated
+  module status aggregation, and versioned module contracts.
+- Portal-owned local authentication, protected first-run administrator setup,
+  optional OIDC/hybrid authentication, and mocked Music and Movies/TV adapters.
+- Portal threat model, Authentik/Caddy integration plan, mocked demonstration,
+  and non-root read-only container validation in layered CI.
+
+### Boundary
+
+- Portal remains isolated from production Compose, real module databases,
+  production gateway routing, and NAS state until Phase 1B is reviewed.
+- No Music source consolidation or production deployment is included.
+
 ## 0.4.0 - 2026-10-15
 
 ### Added
